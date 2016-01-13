@@ -76,9 +76,13 @@ exports = module.exports = function(channelsRootPath){
   function parseVideoFileName(videoFileName) {
     var split1 = videoFileName.split("- ");
     var dateString = split1[0];
-    var split2 = split1[1].split(" -");
-    var youtubeCode = split2[1];
-    var name = split2[0];
+    split1[0] = "";
+    videoFileName = split1.join('');
+
+    var split2 = videoFileName.split(" -");
+    var youtubeCode = split2[split2.length - 1];
+    split2[split2.length - 1] = "";
+    var name = split2.join('');
 
     var date = parseFileDate(dateString);
     return {
