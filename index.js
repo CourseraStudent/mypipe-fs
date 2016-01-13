@@ -73,6 +73,35 @@ exports = module.exports = function(channelsRootPath){
     return channelPublicDirectory;
   }
 
+  function parseVideoFileName(videoFileName) {
+    var split1 = videoFileName.split("- ");
+    var dateString = split1[0];
+    var split2 = split1[1].split(" -");
+    var youtubeCode = split2[1];
+    var name = split2[0];
+
+    var date = parseFileDate(dateString);
+    return {
+      'name': name,
+      'date': date,
+      'youtubeCode': youtubeCode
+    }
+  }
+  function parseFileDate(dateString) {
+    if(dateString.startsWith("s"))
+      dateString = dateString.slice(1);
+
+    var year  = dateString.slice(0, 4);
+    var month = dateString.slice(4, -2);
+    var day   = dateString.slice(-2);
+
+    return {
+      'year': year,
+      'month': month,
+      'day': day
+    }
+  }
+
   function getChannelInfo(channelId) {
     var videos = [];
 
@@ -87,10 +116,16 @@ exports = module.exports = function(channelsRootPath){
       var videoFilebasename = path.basename(videoFilename, videoFilenameExtension);
       var thumbnailFilename = videoFilebasename + ".jpg";
       var id = crypto.createHash('md5').update(videoFilename).digest('hex');
+
+      var videoFilenameInfo = parseVideoFileName(videoFilebasename);
+
       videos.push({ 
                       'id': id,
-                      'name': videoFilename, 
-                      'icon': thumbnailFilename
+                      'file': videoFilename, 
+                      'icon': thumbnailFilename,
+                      'name': videoFilenameInfo.name,
+                      'date': videoFilenameInfo.date,
+                      'youtubeCode': videoFilenameInfo.youtubeCode,
                     });
     }
 
