@@ -23,12 +23,20 @@ exports = module.exports = function(channelsRootPath){
     return directories; 
   }
 
-  function fs_getVideoFilesInDirectory(channelDirectory) {
+  function fs_getFilesInDirectory(channelDirectory) {
     var directoryContent = fs.readdirSync(channelDirectory);
-    var videoFiles = directoryContent.filter(function(filename) { 
+    var files = directoryContent.filter(function(filename) { 
       var filepath = path.join(channelDirectory, filename);
       var stats = fs.statSync(filepath);
-      return stats.isFile() && path.extname(filename) === ".mp4";
+      return stats.isFile();
+    });
+
+    return files; 
+  }
+  function fs_getVideoFilesInDirectory(channelDirectory) {
+    var files = fs_getFilesInDirectory(channelDirectory);
+    var videoFiles = files.filter(function(filename){
+      return path.extname(filename) === ".mp4";
     });
 
     return videoFiles; 
@@ -40,7 +48,7 @@ exports = module.exports = function(channelsRootPath){
     var channelDirectories = fs_getChannelDirectories();
     for (var i = 0; i < channelDirectories.length; i++) {
       var channelName = channelDirectories[i];
-      var id = crypto.createHash('md5').update(channelName).digest('hex');
+      var id = getId(channelName);
       var pathServer = channelsRootPath + '/' + channelName;
       channels.push({ 
                       'id': id,
@@ -54,7 +62,6 @@ exports = module.exports = function(channelsRootPath){
   }
 
   function findChannelById(channelId) {
-    console.log(findChannelById);
     var channelList = getChannelList();
     for (var i = 0; i < channelList.length; i++) {
       console.log(channelList[i].id, channelId)
@@ -119,14 +126,20 @@ exports = module.exports = function(channelsRootPath){
       var videoFilenameExtension = path.extname(videoFilename);
       var videoFilebasename = path.basename(videoFilename, videoFilenameExtension);
       var thumbnailFilename = videoFilebasename + ".jpg";
-      var id = crypto.createHash('md5').update(videoFilename).digest('hex');
+      
+      
+      var id = getId(videoFilename);
+      var thumbnailFileId = getId(thumbnailFilename);
+      var videoId = getId(videoFilename);
 
       var videoFilenameInfo = parseVideoFileName(videoFilebasename);
 
       videos.push({ 
                       'id': id,
                       'file': videoFilename, 
+                      'fileId': videoId,
                       'icon': thumbnailFilename,
+                      'iconId': thumbnailFileId,
                       'name': videoFilenameInfo.name,
                       'date': videoFilenameInfo.date,
                       'youtubeCode': videoFilenameInfo.youtubeCode,
@@ -143,12 +156,39 @@ exports = module.exports = function(channelsRootPath){
     return channelInfo;
   }
 
+  function getId(resourceName) {
+    return crypto.createHash('md5').update(resourceName).digest('hex');
+  }
+
+  function findFilePathByFileId(channelDirectory, fileId) {
+    var files = fs_getFilesInDirectory(channelDirectory);
+
+    for (var i = 0; i < files.length; i++) {
+      var filename = files[i];
+      var id = getId(filename);
+      if(id === fileId) {
+        return filename;
+      }
+    }
+  }
+
+  function getFilePathByIds(channelId, fileId) {
+    var channel = findChannelById(channelId);
+    var channelDirectory = getChannelDirectory(channel);
+
+    var filename = findFilePathByFileId(channelDirectory, fileId);
+    var filepath = path.join(channelDirectory, filename);
+    console.log(filepath);
+    return filepath;
+  }
+
 
 
   return {
     'path': path,
     'getChannelList': getChannelList,
-    'getChannelInfo': getChannelInfo
+    'getChannelInfo': getChannelInfo,
+    'getFilePathByIds': getFilePathByIds
   }
 };
 
