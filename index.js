@@ -128,17 +128,17 @@ exports = module.exports = function(channelsRootPath){
       var thumbnailFilename = videoFilebasename + ".jpg";
       
       
-      var id = getId(videoFilename);
+      // var id = getId(videoFilename);
       var thumbnailFileId = getId(thumbnailFilename);
       var videoId = getId(videoFilename);
-
+      
       var videoFilenameInfo = parseVideoFileName(videoFilebasename);
 
       videos.push({ 
-                      'id': id,
-                      'file': videoFilename, 
-                      'fileId': videoId,
-                      'icon': thumbnailFilename,
+                      // 'id': id,
+                      // 'file': videoFilename, 
+                      'videoId': videoId,
+                      // 'icon': thumbnailFilename,
                       'iconId': thumbnailFileId,
                       'name': videoFilenameInfo.name,
                       'date': videoFilenameInfo.date,
